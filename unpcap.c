@@ -33,12 +33,17 @@ void set_binary_mode() {
     freopen(NULL, "wb", stdout);
 }
 
+void error_exit() {
+    fflush(stdout);
+    exit(-1);
+}
+
 void read_pcap_file_header() {
     PCAP_file_header pcap_file_header;
     size_t res = fread(&pcap_file_header, sizeof pcap_file_header, 1, stdin);
     if(res != 1) {
         perror("Failed to read PCAP record header");
-        exit(-1);
+        error_exit();
     }
 }
 
@@ -47,14 +52,9 @@ int get_pcap_frame_length() {
     size_t res = fread(&pcap_frame_header, sizeof pcap_frame_header, 1, stdin);
     if(res != 1) {
         perror("Failed to read PCAP record header");
-        exit(-1);
+        error_exit();
     }
     return pcap_frame_header.incl_len;
-}
-
-void error_exit() {
-    fflush(stdout);
-    exit(-1);
 }
 
 void skip_pcap_file_header() {
@@ -84,7 +84,6 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "The PCAP frame size %i is larger than allocated buffer size %i\n", pcap_frame_len, BUF_SIZE);
             error_exit();
         }
-        fprintf(stderr, "%i\n", pcap_frame_len);
 
         size_t res = fread(buffer, pcap_frame_len, 1, stdin);
         if(res != 1) {
@@ -105,4 +104,3 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
     fclose(stdout);
 }
-
